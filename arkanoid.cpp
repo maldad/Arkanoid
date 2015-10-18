@@ -16,19 +16,7 @@ int yprima = yfincanon;
 int xactualcanon = xfincanon;
 int yactualcanon = yfincanon-17;
 
-//iniciar una matriz de 63x40
-int matriz[4][25];
-void asignar(){
-
-matriz[0][0] = 1;
-matriz[0][4] = 1;
-matriz[1][14] = 1;
-matriz[1][15] = 1;
-matriz[2][24] = 1;
-matriz[2][0] = 1;
-matriz[3][12] = 1;
-matriz[3][22] = 1;
-}
+int matriz[5][26];
 
 //Starts up SDL and creates window
 bool init();
@@ -53,7 +41,7 @@ void cuadritos(){
 	int ycoor = 10;
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j < 25; j++){
-			if(matriz[i][j] == 1){//dibuja cuadrito si hay un 1 en esa posicion
+			if(matriz[i][j] == 0){//dibuja cuadrito si hay un 1 en esa posicion
 				if(xcoor == 10 && ycoor == 10){//para el primer cuadrito
 					SDL_Rect cuadrito1 = {xcoor, ycoor, 20, 20};
 					SDL_RenderFillRect( gRenderer, &cuadrito1 );
@@ -200,9 +188,31 @@ void traslada_balita_izquierda(int xp, int yp){
 	yactualcanon -=10;
 }//izq
 
+void dormir(){
+	usleep(1000 *25);
+}
+
+bool zona_bloques(int y){
+	if(y <= 105){ //es la zona donde empiezan los bloques, 85+20=105
+		return true;
+	}
+	return false;
+}//zona_bloques
+
+void quita_bloques(int x, int y){
+	puts("entro a la zona de bloques");
+	printf("x, y actual: %d %d\n", x, y);
+	//obteniendo coordenadas reales para borrar el cuadrito
+	x = (x-10)/25;
+	y = (y-10)/25;
+	printf("x, y a borrar: %d %d\n", x, y);
+	//asignamos 1, para que no dibuje cuadrito en esa zona
+	matriz[y][x] = 1;
+}//quita_bloques
+
 int main( int argc, char* args[] ){
 	//Start up SDL and create window
-	asignar();
+	//asignar();
 	if( !init() ){
 		printf( "Failed to initializ!\n" );
 	}else{
@@ -222,32 +232,38 @@ int main( int argc, char* args[] ){
 				else if( e.type == SDL_KEYDOWN ){
 					switch( e.key.keysym.sym ){
 						case SDLK_SPACE:
-						puts("arriba, entonces se dispara");
-						if(xprima >= SCREEN_WIDTH/2){
-							while(xactualcanon < SCREEN_WIDTH && yactualcanon > 40){
-								usleep(1000 *150);
+						puts("espacio, entonces se dispara");
+						if(xprima >= SCREEN_WIDTH/2){//empieza hacia la derecha
+							while(xactualcanon < SCREEN_WIDTH && yactualcanon > 0){
+								dormir();
 								traslada_balita_derecha(xactualcanon, yactualcanon);
-								if(xactualcanon >= SCREEN_WIDTH){
-									usleep(1000 *150);
-									traslada_balita_izquierda(xactualcanon, yactualcanon);
-									while(xactualcanon > 0 && yactualcanon > 40){
-										usleep(1000 *150);
+								if(zona_bloques(yactualcanon)){
+									quita_bloques(xactualcanon, yactualcanon);
+								}
+								if(xactualcanon >= SCREEN_WIDTH){//ha salido por la pared derecha
+									while(xactualcanon > 0 && yactualcanon > 0){
+										dormir();//entonces movemos ahora a la izquierda
 										traslada_balita_izquierda(xactualcanon, yactualcanon);
+										if(zona_bloques(yactualcanon)){
+											quita_bloques(xactualcanon, yactualcanon);
+										}
 									}
 								}
 							}
-						}//if empieza hacia derecha
-						else{//empiez hacia izquierda
-							while(xactualcanon > 0 && yactualcanon > 40){
-								usleep(1000 *150);
+						}//if empieza derecha
+						else{//empieza hacia izquierda
+							while(xactualcanon > 0 && yactualcanon > 0){
+								dormir();
 								traslada_balita_izquierda(xactualcanon, yactualcanon);
-								if(xactualcanon < 0){
-									while(xactualcanon < SCREEN_WIDTH && yactualcanon > 40){
-										usleep(1000 *150);
+									if(zona_bloques(yactualcanon)){
+											//quita_bloques(xactualcanon, yactualcanon);
+										}
+								if(xactualcanon < 0){//ha salido por la pared izquierda
+									while(xactualcanon < SCREEN_WIDTH && yactualcanon > 0){
+										dormir();//entonces movemos hacia la derecha
 										traslada_balita_derecha(xactualcanon, yactualcanon);
-										if(xactualcanon >= SCREEN_WIDTH){
-											usleep(1000 *150);
-											traslada_balita_izquierda(xactualcanon, yactualcanon);
+										if(zona_bloques(yactualcanon)){
+											quita_bloques(xactualcanon, yactualcanon);
 										}
 									}
 								}
@@ -269,9 +285,7 @@ int main( int argc, char* args[] ){
 						break;
 
 						default:
-						//implementar para salir del juego
-						//presionar cualquier tecla para salir
-						//MENOS: izquiera, derecha o espacio
+						//salir del juego con cualquier tecla
 						quit = true;
 						break;
 					}
