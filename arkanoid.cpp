@@ -15,6 +15,21 @@ int xprima = xfincanon;
 int yprima = yfincanon;
 int xactualcanon = xfincanon;
 int yactualcanon = yfincanon-17;
+
+//iniciar una matriz de 63x40
+int matriz[4][25];
+void asignar(){
+
+matriz[0][0] = 1;
+matriz[0][4] = 1;
+matriz[1][14] = 1;
+matriz[1][15] = 1;
+matriz[2][24] = 1;
+matriz[2][0] = 1;
+matriz[3][12] = 1;
+matriz[3][22] = 1;
+}
+
 //Starts up SDL and creates window
 bool init();
 //Frees media and shuts down SDL
@@ -25,6 +40,37 @@ SDL_Window* gWindow = NULL;
 
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
+
+void color_purple(){
+	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+	SDL_RenderClear( gRenderer );
+	SDL_SetRenderDrawColor( gRenderer, 0xad, 0x26, 0xa7, 0xFF );
+}//set color purple
+
+void cuadritos(){
+	color_purple();
+	int xcoor = 10;
+	int ycoor = 10;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 25; j++){
+			if(matriz[i][j] == 1){//dibuja cuadrito si hay un 1 en esa posicion
+				if(xcoor == 10 && ycoor == 10){//para el primer cuadrito
+					SDL_Rect cuadrito1 = {xcoor, ycoor, 20, 20};
+					SDL_RenderFillRect( gRenderer, &cuadrito1 );
+					xcoor += 25;
+				}else{//para los siguientes cuadritos horizontales
+					SDL_Rect cuadrito1 = {xcoor, ycoor, 20, 20};
+					SDL_RenderFillRect( gRenderer, &cuadrito1 );
+					xcoor += 25;
+				}
+			}else{//no dibuja cuadrito, pero avanza x
+				xcoor += 25;
+			}
+		}//termina la primera fila, reiniciamos coordenada X, aumentamos Y
+		xcoor = 10;
+		ycoor += 25;
+	}//for para dibujar los cuadritos
+}//cuadritos
 
 bool init(){
 	//flag para iniciar
@@ -83,31 +129,7 @@ void rotacion(int angle, int xp, int yp){
 }//rotacion
 
 void dibujar(){
-	//Clear screen
-	//colocar un fondo negro
-	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-	SDL_RenderClear( gRenderer );
-
-	SDL_SetRenderDrawColor( gRenderer, 0xad, 0x26, 0xa7, 0xFF );
-	for(int i = 10; i < 630; i+=25){
-		SDL_Rect cuadrito1 = {i, 10, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 20; i < 600; i+=25){
-		SDL_Rect cuadrito1 = {i, 35, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 30; i < 590; i+=25){
-		SDL_Rect cuadrito1 = {i, 60, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 40; i < 570; i+=25){
-		SDL_Rect cuadrito1 = {i, 85, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-
-	//si dejamos un draw color asi, todos los demas
-	//elementos que se dibujen seran del mismo color
+	cuadritos();
 	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
 	SDL_Rect balita = {xfincanon, yfincanon-17, 17, 17};
 	SDL_RenderFillRect( gRenderer, &balita );
@@ -117,31 +139,7 @@ void dibujar(){
 	SDL_RenderPresent( gRenderer );
 }//dibujar
 
-void cuadritos(){
-	//Clear screen
-	//colocar un fondo negro
-	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-	SDL_RenderClear( gRenderer );
-	SDL_SetRenderDrawColor( gRenderer, 0xad, 0x26, 0xa7, 0xFF );
-	for(int i = 10; i < 630; i+=25){
-		SDL_Rect cuadrito1 = {i, 10, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 20; i < 600; i+=25){
-		SDL_Rect cuadrito1 = {i, 35, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 30; i < 590; i+=25){
-		SDL_Rect cuadrito1 = {i, 60, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	for(int i = 40; i < 570; i+=25){
-		SDL_Rect cuadrito1 = {i, 85, 20, 20};
-		SDL_RenderFillRect( gRenderer, &cuadrito1 );
-	}//for
-	SDL_RenderPresent( gRenderer );
 
-}//cuadritos
 
 void cambia_canon(int xp, int yp){
 	//Clear screen
@@ -204,6 +202,7 @@ void traslada_balita_izquierda(int xp, int yp){
 
 int main( int argc, char* args[] ){
 	//Start up SDL and create window
+	asignar();
 	if( !init() ){
 		printf( "Failed to initializ!\n" );
 	}else{
@@ -222,8 +221,7 @@ int main( int argc, char* args[] ){
 				}
 				else if( e.type == SDL_KEYDOWN ){
 					switch( e.key.keysym.sym ){
-						case SDLK_UP:
-						//gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_UP ];
+						case SDLK_SPACE:
 						puts("arriba, entonces se dispara");
 						if(xprima >= SCREEN_WIDTH/2){
 							while(xactualcanon < SCREEN_WIDTH && yactualcanon > 40){
@@ -232,12 +230,10 @@ int main( int argc, char* args[] ){
 								if(xactualcanon >= SCREEN_WIDTH){
 									usleep(1000 *150);
 									traslada_balita_izquierda(xactualcanon, yactualcanon);
-
 									while(xactualcanon > 0 && yactualcanon > 40){
 										usleep(1000 *150);
 										traslada_balita_izquierda(xactualcanon, yactualcanon);
 									}
-
 								}
 							}
 						}//if empieza hacia derecha
@@ -246,9 +242,6 @@ int main( int argc, char* args[] ){
 								usleep(1000 *150);
 								traslada_balita_izquierda(xactualcanon, yactualcanon);
 								if(xactualcanon < 0){
-									//usleep(1000 *150);
-									//traslada_balita_derecha(xactualcanon, yactualcanon);
-
 									while(xactualcanon < SCREEN_WIDTH && yactualcanon > 40){
 										usleep(1000 *150);
 										traslada_balita_derecha(xactualcanon, yactualcanon);
@@ -257,8 +250,6 @@ int main( int argc, char* args[] ){
 											traslada_balita_izquierda(xactualcanon, yactualcanon);
 										}
 									}
-
-
 								}
 							}
 						}
@@ -278,10 +269,9 @@ int main( int argc, char* args[] ){
 						break;
 
 						default:
-						//gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_DEFAULT ];
 						//implementar para salir del juego
 						//presionar cualquier tecla para salir
-						//MENOS: izquiera, derecha o arriba
+						//MENOS: izquiera, derecha o espacio
 						quit = true;
 						break;
 					}
