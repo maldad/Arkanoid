@@ -17,6 +17,9 @@ int xactualcanon = xfincanon;
 int yactualcanon = yfincanon-17;
 
 int matriz[5][26];
+int indice = 0;
+int px[30];
+int py[30];
 
 //Starts up SDL and creates window
 bool init();
@@ -107,7 +110,87 @@ void close(){
 	SDL_Quit();
 }//close
 
-void desplazamiento(int xp, int yp){//xprima, yprima
+void colocar(int x, int y){
+	if(indice == 30){
+		return;
+	}else{
+		px[indice] = x;
+		py[indice] = y;
+	}
+}//colocar
+
+void reset(){//vaciar los arreglos de coordenadas y el indice
+	indice = 0;
+	for(int i = 0; i < 30; i++){
+		px[i] = 0;
+		py[i] = 0;
+	}
+}//reset
+
+void mover_balita(int xp, int yp){
+	//Clear screen
+	//colocar un fondo negro
+	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+	SDL_RenderClear( gRenderer );
+	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
+	cuadritos();
+	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
+
+	//320, 480, 320, 380 -- dibujando el cañon
+	SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
+	SDL_Rect balita = {xp, yp, 17, 17};
+	SDL_RenderFillRect( gRenderer, &balita );
+
+	SDL_RenderPresent( gRenderer );
+	//xactualcanon +=10;
+	//yactualcanon -=10;
+}//mover_balita
+
+
+void bresenham(int x2, int y2, int xl, int yl){
+	reset();
+    int xi = x2;
+    int yi = y2;
+    int xf = xl;
+    int yf = yl;
+
+    //calculando DELTAS
+    int deltax = xf-xi;
+    int deltay = yf-yi;
+
+	if(deltay < 0 && deltax > 0 ){ //&& abs(deltax) > abs(deltay)){
+        printf("CASO 1\n" );
+        int A = -2*deltay;
+        int B = -2*deltay - 2*deltax;
+        int pi = -2*deltay - deltax;
+        printf("A %d B %d pk %d dy %d dx %d\n", A, B, pi, deltay, deltax);
+        printf("inicio (%d, %d)\n", xi, yi);
+        int xk = xi;
+        int yk = yi;
+
+        while (xk <= xf-10 && yk >= yf) {
+            if(pi > 0){
+                xk+=10; //en vez de mover 1 pixel, movemos 10
+                yk-=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+B;
+            }//if
+            else{
+                xk+=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+A;
+            }//else
+        }//while
+		printf("final: %d %d\n", xk, yk);
+		return;
+    }//if caso 1
+}//bresenham
+
+void calcula_limites(int xp, int yp){//xprima, yprima
 	//popsible RETURN en cada IF?
 	int x = xinicanon; //base del canon
 	int y = yinicanon;
@@ -120,6 +203,7 @@ void desplazamiento(int xp, int yp){//xprima, yprima
 		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
 		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+		bresenham(x2, y2, xl, yl);
 	}//caso 1
 	if(x2 < 265){
 		int xl = 0; //limite SCREEN_WIDTH hacia la izquierda
@@ -138,7 +222,9 @@ void desplazamiento(int xp, int yp){//xprima, yprima
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
 	}
-}//desplazamiento
+}//calcula_limites
+
+
 
 void rotacion(int angle, int xp, int yp){
 	int xc = xinicanon;
@@ -268,42 +354,17 @@ int main( int argc, char* args[] ){
 					switch( e.key.keysym.sym ){
 						case SDLK_SPACE:
 						puts("espacio, entonces se dispara");
-						if(xprima >= SCREEN_WIDTH/2){//empieza hacia la derecha
-							while(xactualcanon < SCREEN_WIDTH && yactualcanon > 0){
-								dormir();
-								traslada_balita_derecha(xactualcanon, yactualcanon);
-								if(zona_bloques(yactualcanon)){
-									quita_bloques(xactualcanon, yactualcanon);
-								}
-								if(xactualcanon >= SCREEN_WIDTH){//ha salido por la pared derecha
-									while(xactualcanon > 0 && yactualcanon > 0){
-										dormir();//entonces movemos ahora a la izquierda
-										traslada_balita_izquierda(xactualcanon, yactualcanon);
-										if(zona_bloques(yactualcanon)){
-											quita_bloques(xactualcanon, yactualcanon);
-										}
-									}
-								}
+
+						for(int i = 0; i < 30; i++){
+							dormir();
+							if(px[i] == 0 && py[i] == 0 && i > 0){
+								break;
+							}else{
+								mover_balita(px[i], py[i]);
+								printf("%d %d \n", px[i], py[i]);
 							}
-						}//if empieza derecha
-						else{//empieza hacia izquierda
-							while(xactualcanon > 0 && yactualcanon > 0){
-								dormir();
-								traslada_balita_izquierda(xactualcanon, yactualcanon);
-									if(zona_bloques(yactualcanon)){
-											//quita_bloques(xactualcanon, yactualcanon);
-										}
-								if(xactualcanon < 0){//ha salido por la pared izquierda
-									while(xactualcanon < SCREEN_WIDTH && yactualcanon > 0){
-										dormir();//entonces movemos hacia la derecha
-										traslada_balita_derecha(xactualcanon, yactualcanon);
-										if(zona_bloques(yactualcanon)){
-											quita_bloques(xactualcanon, yactualcanon);
-										}
-									}
-								}
-							}
-						}
+						}//for
+
 						break;
 
 						case SDLK_LEFT:
@@ -312,14 +373,14 @@ int main( int argc, char* args[] ){
 						rotacion(-15, xprima, yprima);
 						cambia_canon(xprima, yprima);
 
-						desplazamiento(xprima, yprima);
+						calcula_limites(xprima, yprima);
 						break;
 
 						case SDLK_RIGHT:
 						rotacion(15, xprima, yprima);
 						cambia_canon(xprima, yprima);
 						puts("mueve cañon a la derecha");
-						desplazamiento(xprima, yprima);
+						calcula_limites(xprima, yprima);
 						break;
 
 						default:
