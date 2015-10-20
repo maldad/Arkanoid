@@ -188,7 +188,6 @@ void bresenham(int x2, int y2, int xl, int yl){
 		return;
     }//if caso 1
 
-
 if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
         printf("CASO 2\n" );
         int A = -2*deltax;
@@ -216,7 +215,37 @@ if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
                 pi = pi+B;
             }//else
         }//while
-    }//if caso 7
+    }//if caso 2
+
+if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
+        printf("CASO 3\n");
+        int A = 2*deltax;
+        int B = 2*deltax - 2*deltay;
+        int pi = 2*deltax - deltay;
+        printf("A %d B %d pk %d dy %d dx %d\n", A, B, pi, deltay, deltax);
+        printf("inicio (%d, %d)\n", xi, yi);
+        int xk = xi;
+        int yk = yi;
+
+        while (xk >= xf && yk >= yf) {
+            if(pi > 0){
+                yk-=10;
+                colocar(yk, xk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+A;
+            }//if
+            else{
+                xk-=10;
+                yk-=10;
+                colocar(yk, xk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+B;
+            }//else
+        }//while
+    }//if caso 3
+
 }//bresenham
 
 void calcula_limites(int xp, int yp){//xprima, yprima
