@@ -121,7 +121,7 @@ void colocar(int x, int y){
 
 void reset(){//vaciar los arreglos de coordenadas y el indice
 	indice = 0;
-	for(int i = 0; i < 30; i++){
+	for(int i = 0; i < 50; i++){
 		px[i] = 0;
 		py[i] = 0;
 	}
@@ -222,15 +222,14 @@ if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
         int A = 2*deltax;
         int B = 2*deltax - 2*deltay;
         int pi = 2*deltax - deltay;
-        printf("A %d B %d pk %d dy %d dx %d\n", A, B, pi, deltay, deltax);
         printf("inicio (%d, %d)\n", xi, yi);
         int xk = xi;
         int yk = yi;
 
-        while (xk >= xf && yk >= yf) {
+        while (xk >= xf && yk >= yf+10) {
             if(pi > 0){
                 yk-=10;
-                colocar(yk, xk);
+                colocar(xk, yk);
 				indice++;
                 printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
@@ -238,13 +237,42 @@ if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
             else{
                 xk-=10;
                 yk-=10;
-                colocar(yk, xk);
+                colocar(xk, yk);
 				indice++;
                 printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
     }//if caso 3
+
+if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
+        printf("CASO 4\n" );
+        int A = 2*deltay;
+        int B = 2*deltay - 2*deltax;
+        int pi = 2*deltay - deltax;
+        printf("inicio (%d, %d)\n", xi, yi);
+        int xk = xi;
+        int yk = yi;
+
+        while (xk >= xf && yk >= yf+10) {
+            if(pi > 0){
+                xk-=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+A;
+            }//if
+            else{
+                xk-=10;
+                yk-=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+B;
+            }//else
+        }//while
+    }//if caso 2
+
 
 }//bresenham
 
@@ -269,6 +297,7 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
 		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+		bresenham(x2, y2, xl, yl);
 	}//caso 4
 	if(x2 <= 377 && x2 > 320){
 		int yl = 0;
@@ -280,6 +309,7 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 		int yl = 0;
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+		bresenham(x2, y2, xl, yl);
 	}
 }//calcula_limites
 
@@ -376,8 +406,7 @@ int main( int argc, char* args[] ){
 						case SDLK_SPACE:
 						puts("espacio, entonces se dispara");
 
-						for(int i = 0; i < 30; i++){
-							puts("voy a dormir y luego a imprimir");
+						for(int i = 0; i < 50; i++){
 							dormir();
 							if(px[i] == 0 && py[i] == 0 && i > 0){
 								break;
