@@ -107,6 +107,39 @@ void close(){
 	SDL_Quit();
 }//close
 
+void desplazamiento(int xp, int yp){//xprima, yprima
+	//popsible RETURN en cada IF?
+	int x = xinicanon; //base del canon
+	int y = yinicanon;
+	int x2 = xp;
+	int y2 = yp;
+	//para el 1er caso, xl =640
+	if(x2 > 377){
+		int xl = 640; //limite SCREEN_WIDTH
+		//ahora calculamos el limite Y
+		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
+		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
+		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	}//caso 1
+	if(x2 < 265){
+		int xl = 0; //limite SCREEN_WIDTH hacia la izquierda
+		//ahora calculamos el limite Y
+		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
+		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
+		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	}//caso 4
+	if(x2 <= 377 && x2 > 320){
+		int yl = 0;
+		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
+		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	}//caso 2
+	if(x2 < 320 && x2 >= 265){
+		int yl = 0;
+		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
+		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	}
+}//desplazamiento
+
 void rotacion(int angle, int xp, int yp){
 	int xc = xinicanon;
 	int yc = yinicanon;
@@ -114,6 +147,8 @@ void rotacion(int angle, int xp, int yp){
 	int y = yp;
 	xprima = xc + ( (x-xc)*cos(angle/57.3) - (y-yc)*sin(angle/57.3));
 	yprima = yc + ( (x-xc)*sin(angle/57.3) + (y-yc)*cos(angle/57.3));
+	printf("xprima, yprima: %d %d\n", xprima, yprima);
+
 }//rotacion
 
 void dibujar(){
@@ -129,7 +164,7 @@ void dibujar(){
 
 
 
-void cambia_canon(int xp, int yp){
+void cambia_canon(int xp, int yp){//dibuja el canon y la balita en su nueva posicion
 	//Clear screen
 	//colocar un fondo negro
 	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
@@ -276,12 +311,15 @@ int main( int argc, char* args[] ){
 						puts("mueve canion a la izquierda");
 						rotacion(-15, xprima, yprima);
 						cambia_canon(xprima, yprima);
+
+						desplazamiento(xprima, yprima);
 						break;
 
 						case SDLK_RIGHT:
 						rotacion(15, xprima, yprima);
 						cambia_canon(xprima, yprima);
 						puts("mueve cañon a la derecha");
+						desplazamiento(xprima, yprima);
 						break;
 
 						default:
