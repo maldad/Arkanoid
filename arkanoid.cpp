@@ -158,7 +158,7 @@ void bresenham(int x2, int y2, int xl, int yl){
     int deltax = xf-xi;
     int deltay = yf-yi;
 
-	if(deltay < 0 && deltax > 0 ){ //&& abs(deltax) > abs(deltay)){
+	if(deltay < 0 && deltax > 0 && abs(deltax) > abs(deltay)){
         printf("CASO 1\n" );
         int A = -2*deltay;
         int B = -2*deltay - 2*deltax;
