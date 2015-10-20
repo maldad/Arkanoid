@@ -18,8 +18,8 @@ int yactualcanon = yfincanon-17;
 
 int matriz[5][26];
 int indice = 0;
-int px[30];
-int py[30];
+int px[50];
+int py[50];
 
 //Starts up SDL and creates window
 bool init();
@@ -111,7 +111,7 @@ void close(){
 }//close
 
 void colocar(int x, int y){
-	if(indice == 30){
+	if(indice == 50){
 		return;
 	}else{
 		px[indice] = x;
@@ -163,7 +163,6 @@ void bresenham(int x2, int y2, int xl, int yl){
         int A = -2*deltay;
         int B = -2*deltay - 2*deltax;
         int pi = -2*deltay - deltax;
-        printf("A %d B %d pk %d dy %d dx %d\n", A, B, pi, deltay, deltax);
         printf("inicio (%d, %d)\n", xi, yi);
         int xk = xi;
         int yk = yi;
@@ -188,6 +187,36 @@ void bresenham(int x2, int y2, int xl, int yl){
 		printf("final: %d %d\n", xk, yk);
 		return;
     }//if caso 1
+
+
+if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
+        printf("CASO 2\n" );
+        int A = -2*deltax;
+        int B = -2*deltax - 2*deltay;
+        int pi = -2*deltax - deltay;
+        printf("inicio (%d, %d)\n", xi, yi);
+        int xk = xi;
+        int yk = yi;
+
+        while (xk <= xf-10 && yk >= yf) {
+            if(pi > 0){
+                //xk++;
+                yk-=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+A;
+            }//if
+            else{
+                xk+=10;
+                yk-=10;
+                colocar(xk, yk);
+				indice++;
+                printf("punto (%d, %d)\n", xk, yk);
+                pi = pi+B;
+            }//else
+        }//while
+    }//if caso 7
 }//bresenham
 
 void calcula_limites(int xp, int yp){//xprima, yprima
@@ -216,6 +245,7 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 		int yl = 0;
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+		bresenham(x2, y2, xl, yl);
 	}//caso 2
 	if(x2 < 320 && x2 >= 265){
 		int yl = 0;
@@ -271,44 +301,6 @@ void cambia_canon(int xp, int yp){//dibuja el canon y la balita en su nueva posi
 
 }//cambia
 
-void traslada_balita_derecha(int xp, int yp){
-	//Clear screen
-	//colocar un fondo negro
-	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-	SDL_RenderClear( gRenderer );
-	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
-	cuadritos();
-	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
-
-	//320, 480, 320, 380 -- dibujando el cañon
-	SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
-	SDL_Rect balita = {xp, yp, 17, 17};
-	SDL_RenderFillRect( gRenderer, &balita );
-
-	SDL_RenderPresent( gRenderer );
-	xactualcanon +=10;
-	yactualcanon -=10;
-}//traslada_balita_derecha
-
-void traslada_balita_izquierda(int xp, int yp){
-	//Clear screen
-	//colocar un fondo negro
-	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-	SDL_RenderClear( gRenderer );
-	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
-	cuadritos();
-	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
-
-	//320, 480, 320, 380 -- dibujando el cañon
-	SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
-	SDL_Rect balita = {xp, yp, 17, 17};
-	SDL_RenderFillRect( gRenderer, &balita );
-
-	SDL_RenderPresent( gRenderer );
-	xactualcanon -=10;
-	yactualcanon -=10;
-}//izq
-
 void dormir(){
 	usleep(1000 *25);
 }
@@ -356,6 +348,7 @@ int main( int argc, char* args[] ){
 						puts("espacio, entonces se dispara");
 
 						for(int i = 0; i < 30; i++){
+							puts("voy a dormir y luego a imprimir");
 							dormir();
 							if(px[i] == 0 && py[i] == 0 && i > 0){
 								break;
