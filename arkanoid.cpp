@@ -16,11 +16,11 @@ int yprima = yfincanon;
 int xactualcanon = xfincanon;
 int yactualcanon = yfincanon-17;
 
-int matriz[5][26];
-int indice = 0;
-int px[50];
-int py[50];
+int matriz[5][26]; //es la matriz para dibujar los bloques
 
+bool sale_por_derecha = false;
+bool sale_por_izquierda = false;
+int angulo_canon = 90; //el cañon se dibuja en vertical al inicio
 //Starts up SDL and creates window
 bool init();
 //Frees media and shuts down SDL
@@ -110,22 +110,9 @@ void close(){
 	SDL_Quit();
 }//close
 
-void colocar(int x, int y){
-	if(indice == 50){
-		return;
-	}else{
-		px[indice] = x;
-		py[indice] = y;
-	}
-}//colocar
-
-void reset(){//vaciar los arreglos de coordenadas y el indice
-	indice = 0;
-	for(int i = 0; i < 50; i++){
-		px[i] = 0;
-		py[i] = 0;
-	}
-}//reset
+void dormir(){
+	usleep(1000 *3);
+}//dormir
 
 void mover_balita(int xp, int yp){
 	//Clear screen
@@ -148,7 +135,7 @@ void mover_balita(int xp, int yp){
 
 
 void bresenham(int x2, int y2, int xl, int yl){
-	reset();
+
     int xi = x2;
     int yi = y2;
     int xf = xl;
@@ -157,7 +144,7 @@ void bresenham(int x2, int y2, int xl, int yl){
     //calculando DELTAS
     int deltax = xf-xi;
     int deltay = yf-yi;
-
+	printf("origen: %d %d, destino: %d %d\n", x2, y2, xl, yl);
 	if(deltay < 0 && deltax > 0 && abs(deltax) > abs(deltay)){
         printf("CASO 1\n" );
         int A = -2*deltay;
@@ -167,25 +154,24 @@ void bresenham(int x2, int y2, int xl, int yl){
         int xk = xi;
         int yk = yi;
 
-        while (xk <= xf-10 && yk >= yf) {
+        while (xk < xf-17 && yk > yf) {
             if(pi > 0){
-                xk+=10; //en vez de mover 1 pixel, movemos 10
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk++;
+                yk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//if
             else{
-                xk+=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk++;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//else
         }//while
 		printf("final: %d %d\n", xk, yk);
-		return;
     }//if caso 1
 
 if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
@@ -197,24 +183,25 @@ if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
         int xk = xi;
         int yk = yi;
 
-        while (xk <= xf-10 && yk >= yf) {
+        while (xk < xf && yk > yf) {
             if(pi > 0){
-                //xk++;
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                yk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
             else{
-                xk+=10;
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk++;
+                yk--;
+                //colocar(xk, yk);
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
+		printf("final: %d %d\n", xk, yk);
     }//if caso 2
 
 if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
@@ -226,23 +213,24 @@ if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
         int xk = xi;
         int yk = yi;
 
-        while (xk >= xf && yk >= yf+10) {
+        while (xk >= xf && yk >= yf) {
             if(pi > 0){
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                yk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
             else{
-                xk-=10;
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk--;
+                yk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
+		printf("final: %d %d\n", xk, yk);
     }//if caso 3
 
 if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
@@ -254,23 +242,24 @@ if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
         int xk = xi;
         int yk = yi;
 
-        while (xk >= xf && yk >= yf+10) {
+        while (xk >= xf && yk >= yf) {
             if(pi > 0){
-                xk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
             else{
-                xk-=10;
-                yk-=10;
-                colocar(xk, yk);
-				indice++;
-                printf("punto (%d, %d)\n", xk, yk);
+                xk--;
+                yk--;
+				dormir();
+				mover_balita(xk, yk);
+                //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
+		printf("final: %d %d\n", xk, yk);
     }//if caso 2
 
 
@@ -282,30 +271,34 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 	int y = yinicanon;
 	int x2 = xp;
 	int y2 = yp;
+	printf("ANGULO ACTUAL--------------------: %d\n", angulo_canon);
 	//para el 1er caso, xl =640
-	if(x2 > 377){
+	if(angulo_canon <= 55){
 		int xl = 640; //limite SCREEN_WIDTH
 		//ahora calculamos el limite Y
 		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
 		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
 		bresenham(x2, y2, xl, yl);
+		sale_por_derecha = true;
 	}//caso 1
-	if(x2 < 265){
+	if(angulo_canon >= 125){
 		int xl = 0; //limite SCREEN_WIDTH hacia la izquierda
 		//ahora calculamos el limite Y
 		//este sirve para el caso 1 y 4, (rebota en pared izq o der)
 		int yl = ( ( (y2-y)*(xl-x) )/(x2-x)  ) + y; //una regla de 3
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
 		bresenham(x2, y2, xl, yl);
+		sale_por_izquierda = true;
 	}//caso 4
-	if(x2 <= 377 && x2 > 320){
+	if(angulo_canon < 125 && angulo_canon > 90){
+		//estos casos son para cuando la balita va salir por el techo
 		int yl = 0;
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
 		bresenham(x2, y2, xl, yl);
 	}//caso 2
-	if(x2 < 320 && x2 >= 265){
+	if(angulo_canon < 90 && angulo_canon > 55){
 		int yl = 0;
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
@@ -326,7 +319,7 @@ void rotacion(int angle, int xp, int yp){
 
 }//rotacion
 
-void dibujar(){
+void dibujar(){ //se utiliza la 1a vez que corre el programa
 	cuadritos();
 	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
 	SDL_Rect balita = {xfincanon, yfincanon-17, 17, 17};
@@ -360,9 +353,6 @@ void cambia_canon(int xp, int yp){//dibuja el canon y la balita en su nueva posi
 
 }//cambia
 
-void dormir(){
-	usleep(1000 *25);
-}
 
 bool zona_bloques(int y){
 	if(y <= 105){ //es la zona donde empiezan los bloques, 85+20=105
@@ -405,33 +395,28 @@ int main( int argc, char* args[] ){
 					switch( e.key.keysym.sym ){
 						case SDLK_SPACE:
 						puts("espacio, entonces se dispara");
-
-						for(int i = 0; i < 50; i++){
-							dormir();
-							if(px[i] == 0 && py[i] == 0 && i > 0){
-								break;
-							}else{
-								mover_balita(px[i], py[i]);
-								printf("%d %d \n", px[i], py[i]);
-							}
-						}//for
+						int xl, yl, xln, yln;
+						calcula_limites(xprima, yprima);
 
 						break;
 
 						case SDLK_LEFT:
 						//aqui mandar a llamar rotacion
-						puts("mueve canion a la izquierda");
-						rotacion(-15, xprima, yprima);
-						cambia_canon(xprima, yprima);
-
-						calcula_limites(xprima, yprima);
+							if(angulo_canon <= 170){
+								angulo_canon += 5;
+							}
+							puts("mueve canion a la izquierda");
+							rotacion(-5, xprima, yprima);
+							cambia_canon(xprima, yprima);
 						break;
 
 						case SDLK_RIGHT:
-						rotacion(15, xprima, yprima);
-						cambia_canon(xprima, yprima);
-						puts("mueve cañon a la derecha");
-						calcula_limites(xprima, yprima);
+							if(angulo_canon >= 10){
+								angulo_canon -= 5;
+							}
+							rotacion(5, xprima, yprima);
+							cambia_canon(xprima, yprima);
+							puts("mueve cañon a la derecha");
 						break;
 
 						default:
