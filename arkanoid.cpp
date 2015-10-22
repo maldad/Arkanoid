@@ -40,6 +40,10 @@ void color_purple(){
 	SDL_SetRenderDrawColor( gRenderer, 0xad, 0x26, 0xa7, 0xFF );
 }//set color purple
 
+void dormir(){
+	usleep(1000 *3);
+}//dormir
+
 void cuadritos(){
 	color_purple();
 	int xcoor = 10;
@@ -112,27 +116,20 @@ void close(){
 	SDL_Quit();
 }//close
 
-void dormir(){
-	usleep(1000 *3);
-}//dormir
 
 void mover_balita(int xp, int yp){
-	//Clear screen
-	//colocar un fondo negro
+	//Clear screen colocando un fondo negro
 	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
 	SDL_RenderClear( gRenderer );
 	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
 	cuadritos();
 	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
-
 	//320, 480, 320, 380 -- dibujando el cañon
 	SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
+
 	SDL_Rect balita = {xp, yp, 17, 17};
 	SDL_RenderFillRect( gRenderer, &balita );
-
 	SDL_RenderPresent( gRenderer );
-	//xactualcanon +=10;
-	//yactualcanon -=10;
 }//mover_balita
 
 bool zona_bloques(int y){
@@ -143,72 +140,103 @@ bool zona_bloques(int y){
 }//zona_bloques
 
 void quita_bloques(int x, int y){
-	puts("entro a la zona de bloques");
-	printf("x, y actual: %d %d\n", x, y);
+	//puts("entro a la zona de bloques");
+	//printf("x, y actual: %d %d\n", x, y);
 	//obteniendo coordenadas reales para borrar el cuadrito
 	x = (x-10)/25;
 	y = (y-10)/25;
-	printf("x, y a borrar: %d %d\n", x, y);
+	//printf("x, y a borrar: %d %d\n", x, y);
 	//asignamos 1, para que no dibuje cuadrito en esa zona
 	matriz[y][x] = 1;
 }//quita_bloques
 
+void colision(int xk, int yk){
+	SDL_SetRenderDrawColor(gRenderer, 0x19, 0xe0, 0x1e, 0xff);
+	SDL_Rect balita = {xk-10, yk, 17*2, 17};
+	SDL_RenderFillRect( gRenderer, &balita );
+	SDL_RenderPresent(gRenderer);
+	usleep(1000*200);
+
+	//dibujando lo demas que hay en el juego
+	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+	SDL_RenderClear( gRenderer );
+	cuadritos();
+	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
+	SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
+
+	SDL_RenderPresent(gRenderer);
+
+	for(int i = 17; i > 0; i--){
+		SDL_SetRenderDrawColor(gRenderer, 0x19, 0xe0, 0x1e, 0xff);
+		SDL_Rect balita = {xk, yk, i, i};
+		SDL_RenderFillRect( gRenderer, &balita );
+		SDL_RenderPresent(gRenderer);
+		usleep(1000*50);
+
+		//dibujando lo demas que hay en el juego
+		SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+		SDL_RenderClear( gRenderer );
+		cuadritos();
+		SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xFF );
+		SDL_RenderDrawLine(gRenderer, xinicanon, yinicanon, xprima, yprima);
+
+		SDL_RenderPresent(gRenderer);
+	}//for para desintegrar balita
+}//colision
 
 void bresenham(int x2, int y2, int xl, int yl){
-
     int xi = x2;
     int yi = y2;
     int xf = xl;
     int yf = yl;
-
     //calculando DELTAS
     int deltax = xf-xi;
     int deltay = yf-yi;
 	printf("origen: %d %d, destino: %d %d\n", x2, y2, xl, yl);
-	if(deltay < 0 && deltax > 0 && abs(deltax) > abs(deltay)){
-        printf("CASO 1\n" );
-        int A = -2*deltay;
-        int B = -2*deltay - 2*deltax;
-        int pi = -2*deltay - deltax;
-        printf("inicio (%d, %d)\n", xi, yi);
-        int xk = xi;
-        int yk = yi;
+if(deltay < 0 && deltax > 0 && abs(deltax) > abs(deltay)){
+    printf("CASO 1\n" );
+    int A = -2*deltay;
+    int B = -2*deltay - 2*deltax;
+    int pi = -2*deltay - deltax;
+    printf("inicio (%d, %d)\n", xi, yi);
+    int xk = xi;
+    int yk = yi;
 
-        while (xk < xf && yk > yf) {
-            if(pi > 0){
-                xk++;
-                yk--;
-				dormir();
-				if(xk > 640){
-					break;
-				}
-  				mover_balita(xk, yk);
-				//revisamos si la balita ha tocado los bloques
-				if(zona_bloques(yk)){
-					quita_bloques(xk, yk);
-				}
-              //printf("punto (%d, %d)\n", xk, yk);
-                pi = pi+B;
-            }//if
-            else{
-                xk++;
-				dormir();
-				if(xk > 640){
-					break;
-				}
-				mover_balita(xk, yk);
-				//revisamos si la balita ha tocado los bloques
-				if(zona_bloques(yk)){
-					quita_bloques(xk, yk);
-				}
-                //printf("punto (%d, %d)\n", xk, yk);
-                pi = pi+A;
-            }//else
-        }//while
-		printf("final: %d %d\n", xk, yk);
-		lastX = xk;
-		lastY = yk;
-    }//if caso 1
+    while (xk < xf && yk > yf) {
+        if(pi > 0){
+        xk++;
+        yk--;
+			dormir();
+			if(xk > 640){
+				break;
+			}
+			mover_balita(xk, yk);
+			//revisamos si la balita ha tocado los bloques
+			if(zona_bloques(yk)){
+				quita_bloques(xk, yk);
+			}
+          //printf("punto (%d, %d)\n", xk, yk);
+            pi = pi+B;
+        }//if
+        else{
+            xk++;
+			dormir();
+			if(xk > 640){
+				break;
+			}
+			mover_balita(xk, yk);
+			//revisamos si la balita ha tocado los bloques
+			if(zona_bloques(yk)){
+				quita_bloques(xk, yk);
+			}
+            //printf("punto (%d, %d)\n", xk, yk);
+            pi = pi+A;
+        }//else
+    }//while
+	printf("final: %d %d\n", xk, yk);
+	lastX = xk;
+	lastY = yk;
+}//if caso 1
 
 if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
         printf("CASO 2\n" );
@@ -484,12 +512,16 @@ int main( int argc, char* args[] ){
 						case SDLK_SPACE:
 						puts("espacio, entonces se dispara");
 						calcula_limites(xprima, yprima);
+						if(!sale_por_derecha && !sale_por_izquierda){
+							colision(lastX, lastY);
+						}
 
 						printf("inicio: %d %d\n", xprima, yprima);
 						printf("final: %d %d\n", lastX, lastY);
 						if(sale_por_derecha){
 							angulo_canon += 90;
 							rebote_derecha(lastX, lastY);
+							colision(lastX, lastY);
 							angulo_canon -= 90;
 							sale_por_derecha = false;
 						}
@@ -497,6 +529,7 @@ int main( int argc, char* args[] ){
 							puts("entering left side");
 							angulo_canon -= 90;
 							rebote_izquierda(lastX, lastY);
+							colision(lastX, lastY);
 							angulo_canon += 90;
 							sale_por_izquierda = false;
 						}
