@@ -16,6 +16,8 @@ int yprima = yfincanon;
 int xactualcanon = xfincanon;
 int yactualcanon = yfincanon-17;
 
+int lastX, lastY;
+
 int matriz[5][26]; //es la matriz para dibujar los bloques
 
 bool sale_por_derecha = false;
@@ -133,6 +135,24 @@ void mover_balita(int xp, int yp){
 	//yactualcanon -=10;
 }//mover_balita
 
+bool zona_bloques(int y){
+	if(y <= 105){ //es la zona donde empiezan los bloques, 85+20=105
+		return true;
+	}
+	return false;
+}//zona_bloques
+
+void quita_bloques(int x, int y){
+	puts("entro a la zona de bloques");
+	printf("x, y actual: %d %d\n", x, y);
+	//obteniendo coordenadas reales para borrar el cuadrito
+	x = (x-10)/25;
+	y = (y-10)/25;
+	printf("x, y a borrar: %d %d\n", x, y);
+	//asignamos 1, para que no dibuje cuadrito en esa zona
+	matriz[y][x] = 1;
+}//quita_bloques
+
 
 void bresenham(int x2, int y2, int xl, int yl){
 
@@ -154,24 +174,40 @@ void bresenham(int x2, int y2, int xl, int yl){
         int xk = xi;
         int yk = yi;
 
-        while (xk < xf-17 && yk > yf) {
+        while (xk < xf && yk > yf) {
             if(pi > 0){
                 xk++;
                 yk--;
 				dormir();
-				mover_balita(xk, yk);
-                //printf("punto (%d, %d)\n", xk, yk);
+				if(xk > 640){
+					break;
+				}
+  				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
+              //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//if
             else{
                 xk++;
 				dormir();
+				if(xk > 640){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//else
         }//while
 		printf("final: %d %d\n", xk, yk);
+		lastX = xk;
+		lastY = yk;
     }//if caso 1
 
 if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
@@ -187,7 +223,14 @@ if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
             if(pi > 0){
                 yk--;
 				dormir();
+				if(yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
@@ -196,12 +239,21 @@ if(deltay < 0 && deltax > 0 && abs(deltax) <= abs(deltay)){
                 yk--;
                 //colocar(xk, yk);
 				dormir();
+				if(yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
 		printf("final: %d %d\n", xk, yk);
+		lastX = xk;
+		lastY = yk;
     }//if caso 2
 
 if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
@@ -217,7 +269,14 @@ if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
             if(pi > 0){
                 yk--;
 				dormir();
+				if(xk < 0 || yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
@@ -225,12 +284,21 @@ if(deltay < 0 && deltax < 0 && abs(deltay) > abs(deltax)){
                 xk--;
                 yk--;
 				dormir();
+				if(xk < 0 || yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
 		printf("final: %d %d\n", xk, yk);
+		lastX = xk;
+		lastY = yk;
     }//if caso 3
 
 if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
@@ -246,7 +314,14 @@ if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
             if(pi > 0){
                 xk--;
 				dormir();
+				if(xk < 0 || yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+A;
             }//if
@@ -254,19 +329,26 @@ if(deltay < 0 && deltax < 0 && abs(deltay) <= abs(deltax)){
                 xk--;
                 yk--;
 				dormir();
+				if(xk < 0 || yk < 0){
+					break;
+				}
 				mover_balita(xk, yk);
+				//revisamos si la balita ha tocado los bloques
+				if(zona_bloques(yk)){
+					quita_bloques(xk, yk);
+				}
                 //printf("punto (%d, %d)\n", xk, yk);
                 pi = pi+B;
             }//else
         }//while
 		printf("final: %d %d\n", xk, yk);
+		lastX = xk;
+		lastY = yk;
     }//if caso 2
-
-
 }//bresenham
 
 void calcula_limites(int xp, int yp){//xprima, yprima
-	//popsible RETURN en cada IF?
+	//calculamos los dos puntos para luego aplicar bresenham
 	int x = xinicanon; //base del canon
 	int y = yinicanon;
 	int x2 = xp;
@@ -297,6 +379,7 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 		int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
 		printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
 		bresenham(x2, y2, xl, yl);
+		sale_por_izquierda = true;
 	}//caso 2
 	if(angulo_canon < 90 && angulo_canon > 55){
 		int yl = 0;
@@ -306,7 +389,29 @@ void calcula_limites(int xp, int yp){//xprima, yprima
 	}
 }//calcula_limites
 
+void rebote_derecha(int xp, int yp){
+	int x = xinicanon; //base del canon
+	int y = 0;
+	int x2 = xp;
+	int y2 = yp;
 
+	int yl = 0;
+	int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
+	printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	bresenham(x2, y2, xl, yl);
+}//rebote_derecha
+
+void rebote_izquierda(int xp, int yp){
+	int x = xinicanon; //base del canon
+	int y = 0;
+	int x2 = xp;
+	int y2 = yp;
+
+	int yl = 0;
+	int xl = ( ( (x2-x)*(yl-y) )/(y2-y)  ) + x;
+	printf("origen: %d %d, finCanon: %d %d, limite: %d %d\n", x, y, x2, y2, xl, yl);
+	bresenham(x2, y2, xl, yl);
+}//rebote_izquierda
 
 void rotacion(int angle, int xp, int yp){
 	int xc = xinicanon;
@@ -354,23 +459,6 @@ void cambia_canon(int xp, int yp){//dibuja el canon y la balita en su nueva posi
 }//cambia
 
 
-bool zona_bloques(int y){
-	if(y <= 105){ //es la zona donde empiezan los bloques, 85+20=105
-		return true;
-	}
-	return false;
-}//zona_bloques
-
-void quita_bloques(int x, int y){
-	puts("entro a la zona de bloques");
-	printf("x, y actual: %d %d\n", x, y);
-	//obteniendo coordenadas reales para borrar el cuadrito
-	x = (x-10)/25;
-	y = (y-10)/25;
-	printf("x, y a borrar: %d %d\n", x, y);
-	//asignamos 1, para que no dibuje cuadrito en esa zona
-	matriz[y][x] = 1;
-}//quita_bloques
 
 int main( int argc, char* args[] ){
 	//Start up SDL and create window
@@ -395,9 +483,23 @@ int main( int argc, char* args[] ){
 					switch( e.key.keysym.sym ){
 						case SDLK_SPACE:
 						puts("espacio, entonces se dispara");
-						int xl, yl, xln, yln;
 						calcula_limites(xprima, yprima);
 
+						printf("inicio: %d %d\n", xprima, yprima);
+						printf("final: %d %d\n", lastX, lastY);
+						if(sale_por_derecha){
+							angulo_canon += 90;
+							rebote_derecha(lastX, lastY);
+							angulo_canon -= 90;
+							sale_por_derecha = false;
+						}
+						if(sale_por_izquierda){
+							puts("entering left side");
+							angulo_canon -= 90;
+							rebote_izquierda(lastX, lastY);
+							angulo_canon += 90;
+							sale_por_izquierda = false;
+						}
 						break;
 
 						case SDLK_LEFT:
@@ -411,12 +513,12 @@ int main( int argc, char* args[] ){
 						break;
 
 						case SDLK_RIGHT:
-							if(angulo_canon >= 10){
-								angulo_canon -= 5;
-							}
-							rotacion(5, xprima, yprima);
-							cambia_canon(xprima, yprima);
-							puts("mueve cañon a la derecha");
+						if(angulo_canon >= 10){
+							angulo_canon -= 5;
+						}
+						rotacion(5, xprima, yprima);
+						cambia_canon(xprima, yprima);
+						puts("mueve cañon a la derecha");
 						break;
 
 						default:
